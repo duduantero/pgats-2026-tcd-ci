@@ -32,7 +32,7 @@ jobs:
         with:
           command: npm run cypress:run
           start: npx http-server -p 5500
-          wait-on: "http://localhost:5500"
+          wait-on: "http://localhost:5500/index.html"
 
       - name: Upload do relatório Mochawesome (Unitários)
         uses: actions/upload-artifact@v4
