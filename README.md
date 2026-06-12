@@ -49,3 +49,16 @@ Este projeto está em constante evolução. As próximas melhorias planejadas in
    ```bash
    npm install
    ```
+2. Rodar Testes Unitários
+   ```bash
+   npm test
+   ```
+3. Rodar Esteria Completa localmente
+   ```bash
+   npm run ci:local
+   ```
+4. Abrir Interface Gráfica do Cypress
+
+```bash
+   npm run cypress open
+```
