@@ -34,6 +34,11 @@ describe("Password Generator E2E Tests", () => {
     cy.get("#open-generate-password").click();
     cy.get("#generate-password").click();
 
+    // Captura a janela do navegador e intercepta o objeto clipboard
+    cy.window().then((win) => {
+      cy.stub(win.navigator.clipboard, "writeText").resolves(); // Simula que deu certo
+    });
+
     // Clica no botão de copiar
     cy.get("#copy-password").click();
 

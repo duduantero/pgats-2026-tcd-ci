@@ -1,10 +1,15 @@
 import { defineConfig } from "cypress";
+import { beforeEach } from "mocha";
 
 export default defineConfig({
+  reporter: "cypress-mochawesome-reporter", // 🛠️ Define o gerador de relatórios
   e2e: {
-    baseUrl: "http://localhost:5500/src", // Aponta diretamente para a pasta src
+    baseUrl: "http://localhost:5500/src",
+    supportFile: false,
     setupNodeEvents(on, config) {
-      // listeners de eventos se necessário
+      import("cypress-mochawesome-reporter/plugin").then((plugin) => {
+        plugin.default(on);
+      });
     },
   },
 });

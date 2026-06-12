@@ -1,3 +1,5 @@
 node_modules/
 mochawesome-report/
 .cypress-version
+cypress/screenshots/
+cypress/videos/

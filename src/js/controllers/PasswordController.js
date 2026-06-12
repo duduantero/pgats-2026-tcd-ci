@@ -27,7 +27,7 @@ export class PasswordController {
       this.view.updateCopyButtonText("Senha copiada com sucesso!");
       setTimeout(() => {
         this.view.updateCopyButtonText("Copiar");
-      }, 1000);
+      }, 3000);
     });
   }
 }
