@@ -1,0 +1,96 @@
+name: "Execução Automatizada de Testes e Deploy"
+
+# Gatilhos automáticos disparados por eventos de Push e Pull Request no repositório
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+# Permissões de segurança necessárias para ler o código e publicar no GitHub Pages
+permissions:
+  contents: read # Permite clonar o repositório
+  pages: write # Permite interagir com a infraestrutura do GitHub Pages
+  id-token: write # Necessário para autenticação segura do deploy via OpenID Connect
+
+jobs:
+  tests-and-deployment:
+    # Define um ambiente Linux virtual limpo e isolado (Runner) fornecido pelo GitHub
+    runs-on: ubuntu-latest
+
+    steps:
+      # Baixa o código-fonte do repositório para dentro do Runner
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # Instala o ambiente do Node.js na versão estável do projeto
+      - name: Configurando Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      # Instalação rápida e indempendente (Clean Install), baseada estritamente no package-lock.json
+      - name: Instalando dependências do projeto
+        run: npm ci
+
+      # Executa a suíte de testes unitários algorítmicos da camada Model via Mocha/Chai
+      - name: Executando os testes unitários (Mocha)
+        run: npm test
+
+      # Executa os testes de interface gráfica levantando um servidor HTTP local temporário
+      - name: Executando os testes E2E (Cypress)
+        uses: cypress-io/github-action@v6
+        with:
+          command: npm run cypress:run
+          start: npx http-server src -p 5500 # Sobe o frontend simulando o servidor real
+          wait-on: "http://localhost:5500/index.html" # Aguarda a página ficar online para soltar os testes
+
+      # =================================================================
+      # ARMAZENAMENTO DE RELATÓRIOS NA PIPELINE
+      # =================================================================
+
+      # Compacta e guarda o report HTML do Mocha como artefato durável na esteira
+      - name: Armazenar Relatório dos Testes Unitários (Mochawesome)
+        uses: actions/upload-artifact@v4
+        #garante o relatório mesmo se houver falha de testes
+        if: always()
+        with:
+          name: Relatorio-Testes-Unitarios-Auto
+          path: mochawesome-report/
+
+      # Compacta e guarda as evidências e telas do Cypress como artefato durável na esteira
+      - name: Armazenar Relatório dos Testes E2E (Cypress)
+        uses: actions/upload-artifact@v4
+        #permite debugar a interface caso os testes quebrem
+        if: always()
+        with:
+          name: Relatorio-Testes-E2E-Auto
+          path: cypress/reports/
+
+      # =================================================================
+      # PUBLICAÇÃO DO FRONTEND (TRAVADA APENAS NA MAIN)
+      # =================================================================
+
+      # Prepara a API de deploy do GitHub Pages para receber os arquivos
+      - name: Configurar ambiente do GitHub Pages
+        #Só executa se os testes passarem E a execução acontecer estritamente na main
+        if: success() && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+
+      # Compacta e prepara a pasta do código do cliente para a publicação
+      - name: Compactar artefatos do Frontend (Pasta src)
+        #Impede o empacotamento de código instável ou originado de branches secundárias
+        if: success() && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "src/"
+
+      # Realiza o deploy definitivo e atualiza o link público da aplicação
+      - name: Deploy para o GitHub Pages
+        #Publicação automatizada blindada realizada apenas sob validação rigorosa na main
+        if: success() && github.ref == 'refs/heads/main'
+        id: deployment
+        uses: actions/deploy-pages@v4
