@@ -1,17 +1,23 @@
-name: "Execução Manual de Testes e Deploy"
+name: "Execução Automatizada de Testes e Deploy"
 
-# Gatilho de execução manual pela interface gráfica do GitHub Actions
+# Gatilhos automáticos disparados por eventos de Push e Pull Request no repositório
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
 
 # Permissões de segurança necessárias para ler o código e publicar no GitHub Pages
 permissions:
   contents: read # Permite clonar o repositório
   pages: write # Permite interagir com a infraestrutura do GitHub Pages
-  id-token: write # Necessário para autenticação segura do deploy via OpenID Connect (OIDC)
+  id-token: write # Necessário para autenticação segura do deploy via OpenID Connect
 
 jobs:
-  tests:
+  tests-and-deployment:
     # Define um ambiente Linux virtual limpo e isolado (Runner) fornecido pelo GitHub
     runs-on: ubuntu-latest
 
@@ -26,7 +32,7 @@ jobs:
         with:
           node-version: 20.x
 
-      # Instalação rápida e idempotente (Clean Install), baseada estritamente no package-lock.json
+      # Instalação rápida e indempendente (Clean Install), baseada estritamente no package-lock.json
       - name: Instalando dependências do projeto
         run: npm ci
 
@@ -47,44 +53,44 @@ jobs:
       # =================================================================
 
       # Compacta e guarda o report HTML do Mocha como artefato durável na esteira
-      - name: Upload do relatório Mochawesome (Unitários)
+      - name: Armazenar Relatório dos Testes Unitários (Mochawesome)
         uses: actions/upload-artifact@v4
         #garante o relatório mesmo se houver falha de testes
         if: always()
         with:
-          name: mocha-unit-report
+          name: Relatorio-Testes-Unitarios-Auto
           path: mochawesome-report/
 
       # Compacta e guarda as evidências e telas do Cypress como artefato durável na esteira
-      - name: Upload do relatório Cypress (Ponta a Ponta)
+      - name: Armazenar Relatório dos Testes E2E (Cypress)
         uses: actions/upload-artifact@v4
         #permite debugar a interface caso os testes quebrem
         if: always()
         with:
-          name: cypress-e2e-report
+          name: Relatorio-Testes-E2E-Auto
           path: cypress/reports/
 
       # =================================================================
-      # DEPLOY SEGURO PARA O GITHUB PAGES
+      # PUBLICAÇÃO DO FRONTEND (TRAVADA APENAS NA MAIN)
       # =================================================================
 
       # Prepara a API de deploy do GitHub Pages para receber os arquivos
       - name: Configurar ambiente do GitHub Pages
-        #trava de Segurança onde só executa se TODAS as suítes de testes passarem
-        if: success()
+        #Só executa se os testes passarem E a execução acontecer estritamente na main
+        if: success() && github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v5
 
-      #compacta e prepara a pasta do código do cliente para a publicação
+      # Compacta e prepara a pasta do código do cliente para a publicação
       - name: Compactar artefatos do Frontend (Pasta src)
-        #trava de Segurança que evita empacotar código instável
-        if: success()
+        #Impede o empacotamento de código instável ou originado de branches secundárias
+        if: success() && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: "src/"
 
       # Realiza o deploy definitivo e atualiza o link público da aplicação
       - name: Deploy para o GitHub Pages
-        #trava de segurança que só realiza deploy apenas se todas as suítes de testes passarem
-        if: success()
+        #Publicação automatizada blindada realizada apenas sob validação rigorosa na main
+        if: success() && github.ref == 'refs/heads/main'
         id: deployment
         uses: actions/deploy-pages@v4

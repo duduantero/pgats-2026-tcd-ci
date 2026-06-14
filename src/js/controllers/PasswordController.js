@@ -14,9 +14,21 @@ export class PasswordController {
   }
 
   handleGeneratePassword() {
-    const { length, options } = this.view.getFormOptions();
-    const newPassword = this.model.generatePassword(length, options);
-    this.view.displayPassword(newPassword);
+    //Sempre limpa os erros antigos da tela ao iniciar uma nova tentativa
+    this.view.clearError();
+
+    try {
+      //Coleta os dados da View de forma segura
+      const { length, options } = this.view.getFormOptions();
+
+      // Dispara a validação e geração da Model dentro do bloco protegido
+      const password = this.model.generatePassword(length, options);
+
+      // Se a Model não lançar erro, exibe a nova senha com sucesso
+      this.view.displayPassword(password);
+    } catch (error) {
+      this.view.showError(error.message);
+    }
   }
 
   handleCopyPassword() {

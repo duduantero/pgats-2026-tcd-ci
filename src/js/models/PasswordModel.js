@@ -25,6 +25,9 @@ export class PasswordModel {
      * @type {any[]}
      */
     const generators = [];
+    if (length < 7 || length > 16) {
+      throw new Error("O tamanho da senha deve estar entre 7 e 16 caracteres.");
+    }
 
     if (options.letters) {
       generators.push(

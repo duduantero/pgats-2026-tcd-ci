@@ -1,51 +1,63 @@
-describe("Password Generator E2E Tests", () => {
+// @ts-nocheck
+
+describe("Teste E2E Geração de Senha", () => {
   beforeEach(() => {
-    cy.visit("/index.html"); // Carrega a página principal
+    cy.visit("/");
   });
 
-  it("deve alternar a visibilidade do painel de opções ao clicar no link de ajuda", () => {
-    // Inicialmente deve estar oculto (classe hide)
+  it("Deve alternar a visibilidade do painel de opções ao clicar no link de ajuda", () => {
     cy.get("#generate-options").should("have.class", "hide");
-
-    // Clica para abrir
     cy.get("#open-generate-password").click();
     cy.get("#generate-options").should("not.have.class", "hide");
-
-    // Clica para fechar novamente
     cy.get("#open-generate-password").click();
     cy.get("#generate-options").should("have.class", "hide");
   });
 
-  it("deve gerar uma senha visível na tela ao preencher o formulário", () => {
+  it("Deve gerar uma senha visível na tela ao preencher o formulário dentro dos limites", () => {
     cy.get("#open-generate-password").click();
-
-    // Altera a quantidade de caracteres para 12
     cy.get("#length").clear().type("12");
-
-    // Clica para criar a senha
     cy.get("#generate-password").click();
-
-    // Valida se o contêiner de resultado aparece e se o h4 possui texto com 12 caracteres
     cy.get("#generated-password").should("be.visible");
     cy.get("#generated-password h4").invoke("text").should("have.length", 12);
   });
 
-  it("deve alterar o texto do botão de cópia ao clicar nele", () => {
+  it("Deve alterar o texto do botão de cópia ao clicar nele", () => {
     cy.get("#open-generate-password").click();
     cy.get("#generate-password").click();
-
-    // Captura a janela do navegador e intercepta o objeto clipboard
     cy.window().then((win) => {
-      cy.stub(win.navigator.clipboard, "writeText").resolves(); // Simula que deu certo
+      cy.stub(win.navigator.clipboard, "writeText").resolves();
     });
-
-    // Clica no botão de copiar
     cy.get("#copy-password").click();
-
-    // Verifica feedback visual imediato
     cy.get("#copy-password").should(
       "contain.text",
       "Senha copiada com sucesso!",
     );
+  });
+
+  it("Deve exibir mensagem de erro quando o usuário digitar 0", () => {
+    cy.get("#open-generate-password").click();
+    cy.get("#length").clear().type("0");
+    cy.get("#generate-password").click();
+    cy.get("#error-message")
+      .should("not.have.class", "hide")
+      .and("contain", "O tamanho da senha deve estar entre 7 e 16 caracteres.");
+  });
+
+  it("Deve exibir mensagem de erro quando o usuário digitar 6", () => {
+    cy.get("#open-generate-password").click();
+    cy.get("#length").clear().type("6");
+    cy.get("#generate-password").click();
+    cy.get("#error-message")
+      .should("not.have.class", "hide")
+      .and("contain", "O tamanho da senha deve estar entre 7 e 16 caracteres.");
+  });
+
+  it("Deve exibir mensagem de erro quando o usuário digitar 17", () => {
+    cy.get("#open-generate-password").click();
+    cy.get("#length").clear().type("17");
+    cy.get("#generate-password").click();
+    cy.get("#error-message")
+      .should("not.have.class", "hide")
+      .and("contain", "O tamanho da senha deve estar entre 7 e 16 caracteres.");
   });
 });

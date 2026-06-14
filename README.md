@@ -1,10 +1,10 @@
-# Gerador de Senhas Seguro 🔐
+# Gerador de Senhas
 
 Um aplicativo web interativo que permite aos usuários criar senhas fortes e personalizadas com base em critérios específicos (letras maiúsculas/minúsculas, números e símbolos), além de oferecer uma interface intuitiva para o preenchimento de formulários de cadastro.
 
 ---
 
-## 📌 Origem do Projeto
+## Origem do Projeto
 
 Este projeto foi originalmente baseado no repositório [password_generator_js](https://github.com/matheusbattisti/password_generator_js/tree/main) do instrutor **Matheus Battisti** (Hora de Codar).
 
@@ -12,7 +12,7 @@ A aplicação original serviu como uma excelente base de interface e lógica ini
 
 ---
 
-## 🚀 Melhorias e Alterações Implementadas
+## Melhorias e Alterações Implementadas
 
 Para elevar o nível de maturidade e confiabilidade da aplicação, foram realizadas as seguintes implementações:
 
@@ -24,7 +24,7 @@ Para elevar o nível de maturidade e confiabilidade da aplicação, foram realiz
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - **Frontend:** HTML5, CSS3, JavaScript (ES6 Modules)
 - **Testes Unitários:** Mocha, Chai
@@ -33,17 +33,15 @@ Para elevar o nível de maturidade e confiabilidade da aplicação, foram realiz
 
 ---
 
-## 📈 Próximos Passos (Melhorias Contínuas)
+## Próximos Passos
 
 Este projeto está em constante evolução. As próximas melhorias planejadas incluem:
 
-- [ ] Criar um feedback visual customizado na View para exibição de erros (substituindo os `alert` nativos).
 - [ ] Adicionar um medidor de força da senha gerada (Fraca, Média, Forte).
-- [ ] Configurar uma esteira de CI (Continuous Integration) via GitHub Actions para rodar a suíte de testes automaticamente a cada commit.
 
 ---
 
-## 🏃‍♂️ Como Rodar os Testes
+## Como Rodar os Testes
 
 1. Instale as dependências de desenvolvimento:
    ```bash

@@ -173,6 +173,17 @@ input:focus {
   padding: 0.5rem 1rem;
 }
 
+.error-container {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 10px;
+  margin-top: 15px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+}
+
 .hide {
   display: none;
 }

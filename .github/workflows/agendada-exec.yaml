@@ -1,14 +1,14 @@
-name: "Execução Manual de Testes e Deploy"
+name: "Execução Agendada de Testes"
 
-# Gatilho de execução manual pela interface gráfica do GitHub Actions
+# Gatilho de execução agendada baseado em expressões Cron do GitHub Actions
 on:
-  workflow_dispatch:
+  schedule:
+    # Roda toda segunda-feira à meia-noite UTC (21:00 de domingo no horário de Brasília)
+    - cron: "0 0 * * 1"
 
-# Permissões de segurança necessárias para ler o código e publicar no GitHub Pages
+# Princípio do menor privilégio: aplica apenas a permissão estritamente necessária para o job
 permissions:
-  contents: read # Permite clonar o repositório
-  pages: write # Permite interagir com a infraestrutura do GitHub Pages
-  id-token: write # Necessário para autenticação segura do deploy via OpenID Connect (OIDC)
+  contents: read # Permite clonar o código do repositório de forma segura
 
 jobs:
   tests:
@@ -49,7 +49,7 @@ jobs:
       # Compacta e guarda o report HTML do Mocha como artefato durável na esteira
       - name: Upload do relatório Mochawesome (Unitários)
         uses: actions/upload-artifact@v4
-        #garante o relatório mesmo se houver falha de testes
+        # Evidência de QA: garante o relatório mesmo se houver falha de testes
         if: always()
         with:
           name: mocha-unit-report
@@ -62,29 +62,4 @@ jobs:
         if: always()
         with:
           name: cypress-e2e-report
-          path: cypress/reports/
-
-      # =================================================================
-      # DEPLOY SEGURO PARA O GITHUB PAGES
-      # =================================================================
-
-      # Prepara a API de deploy do GitHub Pages para receber os arquivos
-      - name: Configurar ambiente do GitHub Pages
-        #trava de Segurança onde só executa se TODAS as suítes de testes passarem
-        if: success()
-        uses: actions/configure-pages@v5
-
-      #compacta e prepara a pasta do código do cliente para a publicação
-      - name: Compactar artefatos do Frontend (Pasta src)
-        #trava de Segurança que evita empacotar código instável
-        if: success()
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: "src/"
-
-      # Realiza o deploy definitivo e atualiza o link público da aplicação
-      - name: Deploy para o GitHub Pages
-        #trava de segurança que só realiza deploy apenas se todas as suítes de testes passarem
-        if: success()
-        id: deployment
-        uses: actions/deploy-pages@v4
+          path: cypress/reports/ # Pasta padrão do cypress-mochawesome-reporter
