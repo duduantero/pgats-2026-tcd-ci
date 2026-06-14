@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { PasswordModel } from "../src/js/models/PasswordModel.js";
 
-describe("PasswordModel Unit Tests", () => {
+describe("Teste Unitários de PasswordModel", () => {
   /**
    * @type {PasswordModel}
    */
