@@ -10,6 +10,7 @@ export class PasswordView {
     this.generatedPasswordElement = document.querySelector(
       "#generated-password",
     );
+    this.errorContainer = document.querySelector("#error-message");
     this.passwordHeading = this.generatedPasswordElement.querySelector("h4");
     this.copyPasswordButton = document.querySelector("#copy-password");
 
@@ -21,8 +22,21 @@ export class PasswordView {
   }
 
   getFormOptions() {
+    const rawValue = this.lengthInput.value.trim();
+
+    let finalLength;
+
+    if (rawValue === "") {
+      finalLength = 7;
+    } else {
+      finalLength = parseInt(rawValue, 10);
+      if (isNaN(finalLength)) {
+        finalLength = 0;
+      }
+    }
+
     return {
-      length: parseInt(this.lengthInput.value, 10) || 0,
+      length: finalLength,
       options: {
         letters: this.lettersInput.checked,
         numbers: this.numbersInput.checked,
@@ -33,6 +47,16 @@ export class PasswordView {
 
   toggleGeneratorOptions() {
     this.generatePasswordContainer.classList.toggle("hide");
+  }
+
+  showError(message) {
+    this.errorContainer.textContent = message;
+    this.errorContainer.classList.remove("hide");
+  }
+
+  clearError() {
+    this.errorContainer.textContent = "";
+    this.errorContainer.classList.add("hide");
   }
 
   displayPassword(password) {
