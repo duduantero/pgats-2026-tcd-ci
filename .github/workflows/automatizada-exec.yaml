@@ -69,6 +69,7 @@ jobs:
         with:
           name: Relatorio-Testes-E2E-Auto
           path: cypress/reports/
+          if-no-files-found: error
 
       # =================================================================
       # PUBLICAÇÃO DO FRONTEND (TRAVADA APENAS NA MAIN)

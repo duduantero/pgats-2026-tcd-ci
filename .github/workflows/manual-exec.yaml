@@ -61,7 +61,7 @@ jobs:
         #permite debugar a interface caso os testes quebrem
         if: always()
         with:
-          name: cypress-e2e-report
+          name: Relatorio-Testes-E2E-Manual
           path: cypress/reports/
           if-no-files-found: error
 

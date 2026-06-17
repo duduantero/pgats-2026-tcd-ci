@@ -61,5 +61,6 @@ jobs:
         #permite debugar a interface caso os testes quebrem
         if: always()
         with:
-          name: cypress-e2e-report
-          path: cypress/reports/ # Pasta padrão do cypress-mochawesome-reporter
+          name: Relatorio-Testes-E2E-Agendada
+          path: cypress/reports/
+          if-no-files-found: error
