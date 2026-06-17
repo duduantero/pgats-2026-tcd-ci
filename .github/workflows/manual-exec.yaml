@@ -62,10 +62,8 @@ jobs:
         if: always()
         with:
           name: cypress-e2e-report
-          path: |
-            cypress/reports/**/*
-            cypress/screenshots/**/*
-            cypress/videos/**/*
+          path: cypress/reports/
+          if-no-files-found: error
 
       # =================================================================
       # DEPLOY SEGURO PARA O GITHUB PAGES
