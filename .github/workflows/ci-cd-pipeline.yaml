@@ -1,21 +1,40 @@
-name: "Execução Manual de Testes e Deploy"
+name: "Pipeline Unificada: Testes e Deploy"
 
-# Gatilho de execução manual pela interface gráfica do GitHub Actions
+# =================================================================
+# GATILHOS DE EXECUÇÃO
+# =================================================================
 on:
+  # Gatilhos automáticos disparados por eventos de Push e Pull Request no repositório
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+  # Gatilho de execução agendada baseado em expressões Cron do GitHub Actions
+  schedule:
+    # Roda toda segunda-feira à meia-noite UTC (21:00 de domingo no horário de Brasília)
+    - cron: "0 0 * * 1"
+
+  # Gatilho de execução manual pela interface gráfica do GitHub Actions
   workflow_dispatch:
 
-# Permissões de segurança necessárias para ler o código e publicar no GitHub Pages
 permissions:
-  contents: read # Permite clonar o repositório
+  contents: read # Permite clonar o repositório de forma segura
   pages: write # Permite interagir com a infraestrutura do GitHub Pages
   id-token: write # Necessário para autenticação segura do deploy via OpenID Connect (OIDC)
 
 jobs:
-  tests:
+  tests-and-deployment:
     # Define um ambiente Linux virtual limpo e isolado (Runner) fornecido pelo GitHub
     runs-on: ubuntu-latest
 
     steps:
+      # -------------------------------------------------------------
+      # ETAPAS INICIAIS E AMBIENTE
+      # -------------------------------------------------------------
       # Baixa o código-fonte do repositório para dentro do Runner
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -30,6 +49,9 @@ jobs:
       - name: Instalando dependências do projeto
         run: npm ci
 
+      # -------------------------------------------------------------
+      # EXECUÇÃO DA SUÍTE DE TESTES
+      # -------------------------------------------------------------
       # Executa a suíte de testes unitários algorítmicos da camada Model via Mocha/Chai
       - name: Executando os testes unitários (Mocha)
         run: npm test
@@ -47,21 +69,21 @@ jobs:
       # =================================================================
 
       # Compacta e guarda o report HTML do Mocha como artefato durável na esteira
-      - name: Upload do relatório Mochawesome (Unitários)
+      - name: Armazenar Relatório dos Testes Unitários (Mochawesome)
         uses: actions/upload-artifact@v4
-        #garante o relatório mesmo se houver falha de testes
+        # Garante o relatório mesmo se houver falha de testes
         if: always()
         with:
-          name: mocha-unit-report
+          name: Relatorio-Testes-Unitarios-Pipeline
           path: mochawesome-report/
 
       # Compacta e guarda as evidências e telas do Cypress como artefato durável na esteira
-      - name: Upload do relatório Cypress (Ponta a Ponta)
+      - name: Armazenar Relatório dos Testes E2E (Cypress)
         uses: actions/upload-artifact@v4
-        #permite debugar a interface caso os testes quebrem
+        # Permite debugar a interface caso os testes quebrem
         if: always()
         with:
-          name: Relatorio-Testes-E2E-Manual
+          name: Relatorio-Testes-E2E-Pipeline
           path: cypress/reports/
           if-no-files-found: error
 
@@ -71,21 +93,30 @@ jobs:
 
       # Prepara a API de deploy do GitHub Pages para receber os arquivos
       - name: Configurar ambiente do GitHub Pages
-        #trava de Segurança onde só executa se TODAS as suítes de testes passarem
-        if: success()
+        # Trava de segurança: Só executa se os testes passarem, se NÃO for agendado (schedule) AND (for disparo manual OU push/PR válido na main)
+        if: |
+          success() && 
+          github.event_name != 'schedule' && 
+          (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main')
         uses: actions/configure-pages@v5
 
-      #compacta e prepara a pasta do código do cliente para a publicação
+      # Compacta e prepara a pasta do código do cliente para a publicação
       - name: Compactar artefatos do Frontend (Pasta src)
-        #trava de Segurança que evita empacotar código instável
-        if: success()
+        # Trava de segurança que evita empacotar código instável ou originado de branches secundárias
+        if: |
+          success() && 
+          github.event_name != 'schedule' && 
+          (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main')
         uses: actions/upload-pages-artifact@v3
         with:
           path: "src/"
 
       # Realiza o deploy definitivo e atualiza o link público da aplicação
       - name: Deploy para o GitHub Pages
-        #trava de segurança que só realiza deploy apenas se todas as suítes de testes passarem
-        if: success()
+        # Publicação automatizada blindada realizada apenas sob validação rigorosa das condicionais acima
+        if: |
+          success() && 
+          github.event_name != 'schedule' && 
+          (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main')
         id: deployment
         uses: actions/deploy-pages@v4
