@@ -16,7 +16,7 @@ on:
   # Gatilho de execução agendada baseado em expressões Cron do GitHub Actions
   schedule:
     # Roda toda segunda-feira à meia-noite UTC (21:00 de domingo no horário de Brasília)
-    - cron: "0 0 * * 1"
+    - cron: "25 16 * * *"
 
   # Gatilho de execução manual pela interface gráfica do GitHub Actions
   workflow_dispatch:
